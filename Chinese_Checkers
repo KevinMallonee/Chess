@@ -1,0 +1,56 @@
+import kivy
+from kivy.app import App
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
+from kivy.graphics import Ellipse, Color
+from kivy.uix.widget import Widget
+
+kivy.require('1.11.1')  # replace with your version of Kivy
+
+# Create the game board class
+class ChineseCheckersBoard(Widget):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.size = (600, 600)  # set board size
+        self.center = self.parent.center  # center the board
+        
+        self.colors = ['red', 'grey']
+        self.board = self.create_board()
+        self.draw_board()
+
+    def create_board(self):
+        # This would ideally be a hexagonal board with proper piece positions
+        # For simplicity, we'll use a grid-based setup as a placeholder
+        board = [[None for _ in range(13)] for _ in range(13)]  # Example grid size
+        return board
+
+    def draw_board(self):
+        # Draw hexagonal grid (placeholder as rectangles for simplicity)
+        with self.canvas:
+            Color(1, 1, 1, 1)  # White color
+            self.rect = Ellipse(pos=(0, 0), size=(100, 100))  # Placeholder for a piece
+
+        # Add pieces to the board, positions should be set here based on rules
+        # Placeholder with random red and grey pieces (add proper logic here)
+        for i in range(13):
+            for j in range(13):
+                if (i + j) % 2 == 0:
+                    self.add_piece(i * 50, j * 50, 'red')  # Example red piece
+                else:
+                    self.add_piece(i * 50, j * 50, 'grey')  # Example grey piece
+
+    def add_piece(self, x, y, color):
+        with self.canvas:
+            if color == 'red':
+                Color(1, 0, 0)  # Red
+            else:
+                Color(0.5, 0.5, 0.5)  # Grey
+            Ellipse(pos=(x, y), size=(30, 30))  # Add circle for piece
+
+# Define the main app class
+class ChineseCheckersApp(App):
+    def build(self):
+        return ChineseCheckersBoard()
+
+if __name__ == '__main__':
+    ChineseCheckersApp().run()
