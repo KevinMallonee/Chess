@@ -1,0 +1,147 @@
+pip install kivy
+
+
+
+import kivy
+
+from kivy.app import App
+
+from kivy.uix.gridlayout import GridLayout
+
+from kivy.uix.image import Image
+
+from kivy.uix.widget import Widget
+
+from kivy.graphics import Color, Rectangle
+
+
+
+kivy.require('2.0.0')
+
+
+
+class ChessBoard(Widget):
+
+    def __init__(self, **kwargs):
+
+        super(ChessBoard, self).__init__(**kwargs)
+
+        self.size = (400, 400)
+
+        self.draw_board()
+
+        self.draw_pieces()
+
+
+
+    def draw_board(self):
+
+        self.canvas.clear()
+
+        colors = [Color(1, 1, 1), Color(0.5, 0.5, 0.5)]
+
+        for row in range(8):
+
+            for col in range(8):
+
+                color = colors[(row + col) % 2]
+
+                with self.canvas:
+
+                    color
+
+                    Rectangle(pos=(col * 50, row * 50), size=(50, 50))
+
+
+
+    def draw_pieces(self):
+
+        # Load chess pieces images
+
+        self.pieces = {
+
+            'bR': 'images/black_rook.png',
+
+            'bN': 'images/black_knight.png',
+
+            'bB': 'images/black_bishop.png',
+
+            'bQ': 'images/black_queen.png',
+
+            'bK': 'images/black_king.png',
+
+            'bP': 'images/black_pawn.png',
+
+            'wR': 'images/white_rook.png',
+
+            'wN': 'images/white_knight.png',
+
+            'wB': 'images/white_bishop.png',
+
+            'wQ': 'images/white_queen.png',
+
+            'wK': 'images/white_king.png',
+
+            'wP': 'images/white_pawn.png',
+
+        }
+
+
+
+        # Initial positions of pieces
+
+        self.initial_positions = [
+
+            ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
+
+            ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
+
+            ['.', '.', '.', '.', '.', '.', '.', '.'],
+
+            ['.', '.', '.', '.', '.', '.', '.', '.'],
+
+            ['.', '.', '.', '.', '.', '.', '.', '.'],
+
+            ['.', '.', '.', '.', '.', '.', '.', '.'],
+
+            ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+
+            ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR'],
+
+        ]
+
+
+
+        for row in range(8):
+
+            for col in range(8):
+
+                piece = self.initial_positions[row][col]
+
+                if piece != '.':
+
+                    img = Image(source=self.pieces[piece], size=(50, 50), pos=(col * 50, row * 50))
+
+                    self.add_widget(img)
+
+
+
+class ChessApp(App):
+
+    def build(self):
+
+        return ChessBoard()
+
+
+
+if __name__ == '__main__':
+
+    ChessApp().run()
+
+    
+
+    #python chess_app.py
+
+    
+
+    #pip install buildozer
