@@ -1,0 +1,158 @@
+import kivy
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.image import Image
+from kivy.uix.label import Label
+from kivy.uix.gridlayout import GridLayout
+from random import shuffle
+
+kivy.require('1.11.1')  # Replace with your Kivy version
+
+# Card class to represent each card
+class Card:
+    def __init__(self, suit, value, image):
+        self.suit = suit
+        self.value = value
+        self.image = image
+        self.points = self.get_points()
+
+    def get_points(self):
+        if self.value in ['J', 'Q', 'K']:
+            return 10
+        elif self.value == 'A':
+            return 11  # Ace can be 1 or 11, handled in the game logic
+        else:
+            return int(self.value)
+
+# Create a deck of cards
+class Deck:
+    suits = ['hearts', 'diamonds', 'clubs', 'spades']
+    values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+
+    def __init__(self):
+        self.cards = []
+        for suit in self.suits:
+            for value in self.values:
+                image_path = f"assets/{value}_of_{suit}.bmp"
+                self.cards.append(Card(suit, value, image_path))
+        shuffle(self.cards)
+
+    def draw_card(self):
+        return self.cards.pop()
+
+# Game logic
+class BlackjackGame:
+    def __init__(self):
+        self.deck = Deck()
+        self.player_hand = []
+        self.dealer_hand = []
+        self.player_score = 0
+        self.dealer_score = 0
+        self.is_game_over = False
+
+    def start_game(self):
+        self.player_hand = [self.deck.draw_card(), self.deck.draw_card()]
+        self.dealer_hand = [self.deck.draw_card(), self.deck.draw_card()]
+        self.player_score = self.calculate_score(self.player_hand)
+        self.dealer_score = self.calculate_score(self.dealer_hand)
+
+    def hit(self):
+        self.player_hand.append(self.deck.draw_card())
+        self.player_score = self.calculate_score(self.player_hand)
+        if self.player_score > 21:
+            self.is_game_over = True
+
+    def stand(self):
+        while self.dealer_score < 17:
+            self.dealer_hand.append(self.deck.draw_card())
+            self.dealer_score = self.calculate_score(self.dealer_hand)
+        self.is_game_over = True
+
+    def calculate_score(self, hand):
+        score = sum(card.points for card in hand)
+        ace_count = sum(1 for card in hand if card.value == 'A')
+        while score > 21 and ace_count:
+            score -= 10  # Convert Ace from 11 to 1
+            ace_count -= 1
+        return score
+
+    def check_winner(self):
+        if self.player_score > 21:
+            return "You bust! Dealer wins!"
+        elif self.dealer_score > 21:
+            return "Dealer busts! You win!"
+        elif self.player_score > self.dealer_score:
+            return "You win!"
+        elif self.player_score < self.dealer_score:
+            return "Dealer wins!"
+        else:
+            return "It's a tie!"
+
+# Main game UI
+class BlackjackApp(App):
+    def build(self):
+        self.game = BlackjackGame()
+        self.game.start_game()
+
+        layout = BoxLayout(orientation='vertical', padding=10)
+        
+        # Display the player's and dealer's hands
+        self.game_area = GridLayout(cols=2, size_hint_y=None, height=300)
+        self.update_game_area()
+
+        # Buttons
+        button_area = BoxLayout(size_hint_y=None, height=50)
+        self.hit_button = Button(text="Hit")
+        self.stand_button = Button(text="Stand")
+        self.hit_button.bind(on_press=self.hit)
+        self.stand_button.bind(on_press=self.stand)
+
+        button_area.add_widget(self.hit_button)
+        button_area.add_widget(self.stand_button)
+
+        # Score and Result Label
+        self.result_label = Label(text="Welcome to Blackjack!")
+        self.score_label = Label(text=f"Player: {self.game.player_score} | Dealer: {self.game.dealer_score}")
+
+        layout.add_widget(self.game_area)
+        layout.add_widget(self.score_label)
+        layout.add_widget(button_area)
+        layout.add_widget(self.result_label)
+
+        return layout
+
+    def update_game_area(self):
+        # Clear previous hands
+        self.game_area.clear_widgets()
+
+        # Display player's hand
+        player_label = Label(text="Player's Hand:")
+        self.game_area.add_widget(player_label)
+        for card in self.game.player_hand:
+            self.game_area.add_widget(Image(source=card.image))
+
+        # Display dealer's hand
+        dealer_label = Label(text="Dealer's Hand:")
+        self.game_area.add_widget(dealer_label)
+        for card in self.game.dealer_hand:
+            self.game_area.add_widget(Image(source=card.image))
+
+    def hit(self, instance):
+        if not self.game.is_game_over:
+            self.game.hit()
+            self.update_game_area()
+            self.score_label.text = f"Player: {self.game.player_score} | Dealer: {self.game.dealer_score}"
+            if self.game.is_game_over:
+                self.result_label.text = self.game.check_winner()
+
+    def stand(self, instance):
+        if not self.game.is_game_over:
+            self.game.stand()
+            self.update_game_area()
+            self.score_label.text = f"Player: {self.game.player_score} | Dealer: {self.game.dealer_score}"
+            if self.game.is_game_over:
+                self.result_label.text = self.game.check_winner()
+
+if __name__ == '__main__':
+    BlackjackApp().run()
